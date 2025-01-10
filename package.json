@@ -1,0 +1,19 @@
+{
+  "name": "com.loganland.namruutilitysuite",
+  "version": "1.0.1",
+  "displayName": "NAMRU Utilitiy Suite",
+  "description": "Package with all the most common tools for NAMRU apps I develop in Unity.",
+  "documentationUrl": "https://example.com/",
+  "changelogUrl": "https://example.com/changelog.html",
+  "licensesUrl": "https://example.com/licensing.html",
+  "keywords": [
+    "keyword1",
+    "keyword2",
+    "keyword3"
+  ],
+  "author": {
+    "name": "Logan Jarrett",
+    "email": "unity@example.com",
+    "url": "https://www.unity3d.com"
+  }
+}
