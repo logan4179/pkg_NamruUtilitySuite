@@ -279,7 +279,7 @@ GameObject:
   - component: {fileID: 7645608840692647834}
   - component: {fileID: 4638061985830959748}
   m_Layer: 5
-  m_Name: '[Group] - Version Display'
+  m_Name: '[Version Displayer]'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -577,8 +577,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: LoganPackages.LogansVersionDisplayer, com.loganland.logansversiondisplayer
+      - m_Target: {fileID: 4638061985830959748}
+        m_TargetAssemblyTypeName: NamruUtilitySuite.LogansVersionDisplayer, com.loganland.namruutiltysuite
         m_MethodName: FlipBodyActive
         m_Mode: 1
         m_Arguments:
