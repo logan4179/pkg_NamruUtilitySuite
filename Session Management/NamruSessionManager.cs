@@ -11,11 +11,6 @@ using UnityEngine.Events;
 
 namespace NamruUtilitySuite
 {
-	public class MessageEvent : UnityEvent<string>
-	{
-
-	}
-
 	public class NamruSessionManager : MonoBehaviour
 	{
 		public static NamruSessionManager Instance;
