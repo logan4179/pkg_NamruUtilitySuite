@@ -145,22 +145,22 @@ namespace NamruUtilitySuite
             }
         }
 
-        public void SetFloattPref( float val, int index )
+        public void SetFloattPref( float val, int indx )
         {
-            if ( index > Keys_float.Count - 1 )
+            if ( indx > Keys_float.Count - 1 )
             {
-                log_protected($"NPPM ERROR! You tried to set a string value at index: '{index}', which went beyond the count of {nameof(Keys_float)}. Returning early...");
+                log_protected($"NPPM ERROR! You tried to set a string value at index: '{indx}', which went beyond the count of {nameof(Keys_float)}. Returning early...");
                 return;
             }
 
             try
             {
-                Values_float[index] = val;
-                PlayerPrefs.SetFloat( Keys_int[index], val );
+                Values_float[indx] = val;
+                PlayerPrefs.SetFloat( Keys_int[indx], val );
             }
             catch ( System.Exception e )
             {
-                log_protected($"NPPM >> Caught exception of type: '{e.GetType()}' while trying to set playerpref float '{val}'. exception says: \n{e.ToString()}");
+                log_protected($"NPPM >> Caught exception of type: '{e.GetType()}' while trying to set playerpref float '{val}', with index: '{indx}'. exception says: \n{e.ToString()}");
                 //throw;
             }
         }
