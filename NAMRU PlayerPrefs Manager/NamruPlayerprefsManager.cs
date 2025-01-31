@@ -10,17 +10,17 @@ namespace NamruUtilitySuite
 
         [Header("STRINGS")]
         public List<string> Keys_string = new List<string>();
-        public List<string> DefaultValues_string = new List<string>();
+        [SerializeField] private List<string> defaultValues_string = new List<string>();
         [HideInInspector] public List<string> Values_string = new List<string>();
 
         [Header("INTS")]
         public List<string> Keys_int = new List<string>();
-        public List<int> DefaultValues_int = new List<int>();
+        [SerializeField] private List<int> defaultValues_int = new List<int>();
         [HideInInspector] public List<int> Values_int = new List<int>();
 
         [Header("FLOATS")]
         public List<string> Keys_float = new List<string>();
-        public List<float> DefaultValues_float = new List<float>();
+        [SerializeField] private List<float> defaultValues_float = new List<float>();
         [HideInInspector] public List<float> Values_float = new List<float>();
 
         public MessageEvent Event_LogMessage = new MessageEvent();
@@ -61,9 +61,9 @@ namespace NamruUtilitySuite
                     }
                     else
                     {
-                        log_protected( $"Key: '{Keys_string[i]}' was NOT saved in playerprefs. Using default value: '{DefaultValues_string[i]}'" );
+                        log_protected( $"Key: '{Keys_string[i]}' was NOT saved in playerprefs. Using default value: '{defaultValues_string[i]}'" );
 
-                        PlayerPrefs.SetString( Keys_string[i], DefaultValues_string[i] );
+                        PlayerPrefs.SetString( Keys_string[i], defaultValues_string[i] );
                     }
                 }
             }
@@ -79,9 +79,9 @@ namespace NamruUtilitySuite
                     }
                     else
                     {
-                        log_protected( $"Key: '{Keys_int[i]}' was NOT saved in playerprefs. Using default value: '{DefaultValues_int[i]}'" );
+                        log_protected( $"Key: '{Keys_int[i]}' was NOT saved in playerprefs. Using default value: '{defaultValues_int[i]}'" );
 
-                        PlayerPrefs.SetInt( Keys_int[i], DefaultValues_int[i] );
+                        PlayerPrefs.SetInt( Keys_int[i], defaultValues_int[i] );
                     }
                 }
             }
@@ -97,9 +97,9 @@ namespace NamruUtilitySuite
                     }
                     else
                     {
-                        log_protected($"NPPM: Key: '{Keys_float[i]}' was NOT saved in playerprefs. Using default value: '{DefaultValues_float[i]}'");
+                        log_protected($"NPPM: Key: '{Keys_float[i]}' was NOT saved in playerprefs. Using default value: '{defaultValues_float[i]}'");
 
-                        PlayerPrefs.SetFloat( Keys_float[i], DefaultValues_float[i] );
+                        PlayerPrefs.SetFloat( Keys_float[i], defaultValues_float[i] );
                     }
                 }
             }
@@ -168,29 +168,29 @@ namespace NamruUtilitySuite
         public bool CheckIfKosher()
         {
             if ( 
-                (Keys_string != null && DefaultValues_string == null) || 
-                (Keys_string.Count != DefaultValues_string.Count)
+                (Keys_string != null && defaultValues_string == null) || 
+                (Keys_string.Count != defaultValues_string.Count)
             )
             {
-                log_protected( $"NPPM ERROR! {nameof(Keys_string)} or {nameof(DefaultValues_string)} had an inconsistency." );
+                log_protected( $"NPPM ERROR! {nameof(Keys_string)} or {nameof(defaultValues_string)} had an inconsistency." );
                 return false;
             }
 
             if (
-                (Keys_int != null && DefaultValues_int == null) ||
-                (Keys_int.Count != DefaultValues_int.Count)
+                (Keys_int != null && defaultValues_int == null) ||
+                (Keys_int.Count != defaultValues_int.Count)
             )
             {
-                log_protected($"NPPM ERROR! {nameof(Keys_int)} or {nameof(DefaultValues_int)} had an inconsistency.");
+                log_protected($"NPPM ERROR! {nameof(Keys_int)} or {nameof(defaultValues_int)} had an inconsistency.");
                 return false;
             }
 
             if (
-                (Keys_float != null && DefaultValues_float == null) ||
-                (Keys_float.Count != DefaultValues_float.Count)
+                (Keys_float != null && defaultValues_float == null) ||
+                (Keys_float.Count != defaultValues_float.Count)
             )
             {
-                log_protected($"NPPM ERROR! {nameof(Keys_float)} or {nameof(DefaultValues_float)} had an inconsistency.");
+                log_protected($"NPPM ERROR! {nameof(Keys_float)} or {nameof(defaultValues_float)} had an inconsistency.");
                 return false;
             }
 
