@@ -156,7 +156,7 @@ namespace NamruUtilitySuite
             try
             {
                 Values_float[indx] = val;
-                PlayerPrefs.SetFloat( Keys_int[indx], val );
+                PlayerPrefs.SetFloat( Keys_float[indx], val );
             }
             catch ( System.Exception e )
             {
