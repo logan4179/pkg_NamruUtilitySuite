@@ -9,7 +9,7 @@ namespace NamruUtilitySuite
     {
 
     }
-    public class MessageEvent : UnityEvent<string>
+    public class MessageEvent : UnityEvent<string, LogType>
     {
 
     }

@@ -61,7 +61,7 @@ namespace NamruUtilitySuite
                     }
                     else
                     {
-                        log_protected( $"Key: '{Keys_string[i]}' was NOT saved in playerprefs. Using default value: '{defaultValues_string[i]}'" );
+                        log_protected( $"Key: '{Keys_string[i]}' was NOT saved in playerprefs. Using default value: '{defaultValues_string[i]}'", LogType.Warning );
 
                         PlayerPrefs.SetString( Keys_string[i], defaultValues_string[i] );
                     }
@@ -70,7 +70,7 @@ namespace NamruUtilitySuite
 
             if ( Keys_int != null && Keys_int.Count > 0 )
             {
-                Keys_int = new List<string>();
+                Values_int = new List<int>();
                 for ( int i = 0; i < Keys_int.Count; i++ )
                 {
                     if ( PlayerPrefs.HasKey(Keys_int[i]) )
@@ -79,7 +79,7 @@ namespace NamruUtilitySuite
                     }
                     else
                     {
-                        log_protected( $"Key: '{Keys_int[i]}' was NOT saved in playerprefs. Using default value: '{defaultValues_int[i]}'" );
+                        log_protected( $"Key: '{Keys_int[i]}' was NOT saved in playerprefs. Using default value: '{defaultValues_int[i]}'", LogType.Warning);
 
                         PlayerPrefs.SetInt( Keys_int[i], defaultValues_int[i] );
                     }
@@ -97,7 +97,7 @@ namespace NamruUtilitySuite
                     }
                     else
                     {
-                        log_protected($"NPPM: Key: '{Keys_float[i]}' was NOT saved in playerprefs. Using default value: '{defaultValues_float[i]}'");
+                        log_protected($"NPPM: Key: '{Keys_float[i]}' was NOT saved in playerprefs. Using default value: '{defaultValues_float[i]}'", LogType.Warning);
 
                         PlayerPrefs.SetFloat( Keys_float[i], defaultValues_float[i] );
                     }
@@ -109,7 +109,7 @@ namespace NamruUtilitySuite
         {
             if( index > Keys_string.Count - 1 )
             {
-                log_protected($"NPPM ERROR! You tried to set a string value at index: '{index}', which went beyond the count of {nameof(Keys_string)}. Returning early...");
+                log_protected($"NPPM ERROR! You tried to set a string value at index: '{index}', which went beyond the count of {nameof(Keys_string)}. Returning early...", LogType.Error );
                 return;
             }
 
@@ -120,7 +120,7 @@ namespace NamruUtilitySuite
             }
             catch ( System.Exception e )
             {
-                log_protected($"NPPM >> Caught exception of type: '{e.GetType()}' while trying to set playerpref string '{val}'. exception says: \n{e.ToString()}");
+                log_protected($"NPPM >> Caught exception of type: '{e.GetType()}' while trying to set playerpref string '{val}'. exception says: \n{e.ToString()}", LogType.Exception);
                 //throw;
             }
         }
@@ -129,7 +129,7 @@ namespace NamruUtilitySuite
         {
             if ( index > Keys_int.Count - 1 )
             {
-                log_protected($"NPPM ERROR! You tried to set a string value at index: '{index}', which went beyond the count of {nameof(Keys_int)}. Returning early...");
+                log_protected($"NPPM ERROR! You tried to set a string value at index: '{index}', which went beyond the count of {nameof(Keys_int)}. Returning early...", LogType.Error );
                 return;
             }
 
@@ -140,7 +140,7 @@ namespace NamruUtilitySuite
             }
             catch ( System.Exception e )
             {
-                log_protected($"NPPM >> Caught exception of type: '{e.GetType()}' while trying to set playerpref int '{val}'. exception says: \n{e.ToString()}");
+                log_protected($"NPPM >> Caught exception of type: '{e.GetType()}' while trying to set playerpref int '{val}'. exception says: \n{e.ToString()}", LogType.Exception );
                 //throw;
             }
         }
@@ -149,7 +149,7 @@ namespace NamruUtilitySuite
         {
             if ( indx > Keys_float.Count - 1 )
             {
-                log_protected($"NPPM ERROR! You tried to set a string value at index: '{indx}', which went beyond the count of {nameof(Keys_float)}. Returning early...");
+                log_protected($"NPPM ERROR! You tried to set a string value at index: '{indx}', which went beyond the count of {nameof(Keys_float)}. Returning early...", LogType.Error );
                 return;
             }
 
@@ -160,7 +160,7 @@ namespace NamruUtilitySuite
             }
             catch ( System.Exception e )
             {
-                log_protected($"NPPM >> Caught exception of type: '{e.GetType()}' while trying to set playerpref float '{val}', with index: '{indx}'. exception says: \n{e.ToString()}");
+                log_protected( $"NPPM >> Caught exception of type: '{e.GetType()}' while trying to set playerpref float '{val}', with index: '{indx}'. exception says: \n{e.ToString()}", LogType.Exception );
                 //throw;
             }
         }
@@ -172,7 +172,7 @@ namespace NamruUtilitySuite
                 (Keys_string.Count != defaultValues_string.Count)
             )
             {
-                log_protected( $"NPPM ERROR! {nameof(Keys_string)} or {nameof(defaultValues_string)} had an inconsistency." );
+                log_protected( $"NPPM ERROR! {nameof(Keys_string)} or {nameof(defaultValues_string)} had an inconsistency.", LogType.Error );
                 return false;
             }
 
@@ -181,7 +181,7 @@ namespace NamruUtilitySuite
                 (Keys_int.Count != defaultValues_int.Count)
             )
             {
-                log_protected($"NPPM ERROR! {nameof(Keys_int)} or {nameof(defaultValues_int)} had an inconsistency.");
+                log_protected($"NPPM ERROR! {nameof(Keys_int)} or {nameof(defaultValues_int)} had an inconsistency.", LogType.Error );
                 return false;
             }
 
@@ -190,16 +190,16 @@ namespace NamruUtilitySuite
                 (Keys_float.Count != defaultValues_float.Count)
             )
             {
-                log_protected($"NPPM ERROR! {nameof(Keys_float)} or {nameof(defaultValues_float)} had an inconsistency.");
+                log_protected($"NPPM ERROR! {nameof(Keys_float)} or {nameof(defaultValues_float)} had an inconsistency.", LogType.Error );
                 return false;
             }
 
             return true;
         }
 
-        private void log_protected( string message )
+        private void log_protected( string message, LogType logtype )
         {
-            Event_LogMessage.Invoke( message );
+            Event_LogMessage.Invoke( message, logtype );
             if ( AmConsoleLoggingMessages )
             {
                 Debug.Log( message );

@@ -539,7 +539,7 @@ namespace NamruUtilitySuite
 
 					if ( !string.IsNullOrEmpty(receiveString) )
 					{
-						Event_RecievedUDPString.Invoke( receiveString );
+						Event_RecievedUDPString.Invoke( receiveString, LogType.Log );
 					}
 				}
 				catch (SocketException)
