@@ -64,6 +64,7 @@ namespace NamruUtilitySuite
                         log_protected( $"Key: '{Keys_string[i]}' was NOT saved in playerprefs. Using default value: '{defaultValues_string[i]}'", LogType.Warning );
 
                         PlayerPrefs.SetString( Keys_string[i], defaultValues_string[i] );
+                        Values_string.Add( defaultValues_string[i] );
                     }
                 }
             }
@@ -82,6 +83,8 @@ namespace NamruUtilitySuite
                         log_protected( $"Key: '{Keys_int[i]}' was NOT saved in playerprefs. Using default value: '{defaultValues_int[i]}'", LogType.Warning);
 
                         PlayerPrefs.SetInt( Keys_int[i], defaultValues_int[i] );
+                        Values_int.Add( defaultValues_int[i] );
+
                     }
                 }
             }
@@ -100,6 +103,8 @@ namespace NamruUtilitySuite
                         log_protected($"NPPM: Key: '{Keys_float[i]}' was NOT saved in playerprefs. Using default value: '{defaultValues_float[i]}'", LogType.Warning);
 
                         PlayerPrefs.SetFloat( Keys_float[i], defaultValues_float[i] );
+                        Values_float.Add( defaultValues_float[i] );
+
                     }
                 }
             }
