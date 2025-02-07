@@ -15,11 +15,20 @@ namespace NamruUtilitySuite
 
         public float Duration; //Note: I'm NOT making this constant because I've had cases where I needed the duration to change dynamically...
 
-        public Alarm(AlarmMode mode, float myDur)
+        [Header("RANDOMIZATION")]
+        public bool AmRandomized;
+        public float MinDuration;
+        public float MaxDuration;
+
+        public Alarm( AlarmMode mode, float myDur )
         {
             Mode = mode;
             currentValue = 0;
             Duration = myDur;
+
+            AmRandomized = false;
+            MinDuration = 0;
+            MaxDuration = 0;
 
             Reset();
         }
@@ -29,11 +38,16 @@ namespace NamruUtilitySuite
         /// </summary>
         public void Reset()
         {
-            if (Mode == AlarmMode.CountingDown)
+            if ( AmRandomized )
+            {
+                Duration = Random.Range( MinDuration, MaxDuration );
+            }
+
+            if ( Mode == AlarmMode.CountingDown )
             {
                 currentValue = Duration;
             }
-            else if (Mode == AlarmMode.CountingUp)
+            else if ( Mode == AlarmMode.CountingUp )
             {
                 currentValue = 0f;
             }
