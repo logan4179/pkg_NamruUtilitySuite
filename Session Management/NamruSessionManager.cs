@@ -28,7 +28,7 @@ namespace NamruUtilitySuite
 		public string ParticipantID => participantID;
 
 		/// <summary>
-		/// String identifying the session in the full 
+		/// The session part of the full filename string 
 		/// </summary>
 		private string sessionString;
 
@@ -73,7 +73,7 @@ namespace NamruUtilitySuite
 		[Header("[----------- SESSION DATA ----------]")]
 		[Tooltip("Makes the format for the csv file headers for the output for this session")]
 		public List<string> DataHeaders;
-		[SerializeField] TrialResultsMode trialResultsMode;
+		//[SerializeField] TrialResultsMode trialResultsMode;
 		[SerializeField] TrialResultsFormat trialResultsFormat;
 
 		[Header("[----------- TRUTH ----------]")]
@@ -127,7 +127,9 @@ namespace NamruUtilitySuite
 		private bool flag_haveSuccesfullyCreatedTrialResultsFile = false;
 
 		private bool flag_haveSuccesfullyFoundOrCreatedCurrentSessionDirectory = false;
-		private bool flag_haveSuccesfullyCreatedSessionFile = false;
+        public bool Flag_haveSuccesfullyFoundOrCreatedCurrentSessionDirectory => flag_haveSuccesfullyFoundOrCreatedCurrentSessionDirectory;
+
+        private bool flag_haveSuccesfullyCreatedSessionFile = false;
 
 		private bool flag_haveSuccesfullyFoundOrCreatedLogFile = false;
 
@@ -135,13 +137,30 @@ namespace NamruUtilitySuite
 
 		[SerializeField] private string DBG_Class;
 
-		private void OnEnable()
+        /// <summary>Keeps track of the latest debug message. Use this in the host program to get more information about 
+        /// what has happened in this manager.</summary>
+        private string dbgReport;
+		/// <summary>Keeps track of the latest debug message. Use this in the host program to get more information about 
+		/// what has happened in this manager.</summary>
+		public string DebugReport => dbgReport;
+
+		[Header("[----------- FLAGS ----------]")]
+		private bool flag_amClosing = false;
+
+        private void OnEnable()
 		{
 			Event_RecievedUDPString = new MessageEvent();
 		}
 
 		private void OnDisable()
 		{
+			Debug.Log( $"{nameof(NamruSessionManager)}.{nameof(OnDisable)}().");
+
+			if( !flag_amClosing )
+			{
+				CloseMe();
+			}
+
 			Event_RecievedUDPString.RemoveAllListeners();
 		}
 
@@ -185,7 +204,7 @@ namespace NamruUtilitySuite
 
 				if( AmOutputtingTrialResults )
 				{
-					TryToFindOrCreateTextTrialResultsDirectory();
+					TryToFindOrCreateTrialResultsDirectory();
 				}
 			}
 		}
@@ -196,6 +215,8 @@ namespace NamruUtilitySuite
 			NamruLogManager.IncrementTabLevel();
 
 			amPastFirstLoad = true;
+
+			flag_amClosing = false;
 
 			MakeDebugFileString();
 
@@ -267,58 +288,13 @@ namespace NamruUtilitySuite
 			NamruLogManager.DecrementTabLevel();
 		}
 
-		public void TryToStartLogFileWriter()
-		{
-			NamruLogManager.Log($"{nameof(TryToStartLogFileWriter)}()", LogDestination.Hidden);
-			NamruLogManager.IncrementTabLevel();
-
-			NamruLogManager.Log($"trying to create log at filepath: '{filePath_log}'...");
-			try
-			{
-				streamWriter_log = new StreamWriter(filePath_log);
-				streamWriter_log.WriteLine($"Created log at: '{DateTime.Now}'");
-
-				//File.WriteAllText( FilePath_log, $"Created log at: '{System.DateTime.Now}'" );
-				flag_haveSuccesfullyFoundOrCreatedLogFile = true;
-
-			}
-			catch ( Exception e )
-			{
-				NamruLogManager.LogException( e );
-			}
-
-			NamruLogManager.DecrementTabLevel();
-		}
-
-		public void TryToStartTrialResultsFileWriter()
-		{
-			NamruLogManager.Log( $"{nameof(TryToStartTrialResultsFileWriter)}()", LogDestination.Hidden );
-			NamruLogManager.IncrementTabLevel();
-
-			NamruLogManager.Log( $"trying to create trial results at filepath: '{filePath_sessionTrialResults}'..." );
-			try
-			{
-				streamWriter_trialResults = new StreamWriter( filePath_sessionTrialResults );
-				streamWriter_trialResults.WriteLine($"Created trial results at: '{DateTime.Now}'");
-
-				NamruLogManager.Log( $"Created trial results at: '{System.DateTime.Now}'" );
-				flag_haveSuccesfullyCreatedTrialResultsFile = true;
-
-			}
-			catch (Exception e)
-			{
-				NamruLogManager.LogException(e);
-			}
-
-			NamruLogManager.DecrementTabLevel();
-		}
-
-		/// <summary>
-		/// Takes in a path string, checks if a directory exists at it's path, and if not, tries to create a directory.
-		/// </summary>
-		/// <param name="dirPath_passed"></param>
-		/// <returns>true if it is succesful at either finding or creating a directory at the supplied path. False if not succesful at one of these.</returns>
-		private bool TryToFindOrCreateDirectory( string dirPath_passed )
+        #region DIRECTORY CREATION ---------------------------------------------------------------------
+        /// <summary>
+        /// Takes in a path string, checks if a directory exists at it's path, and if not, tries to create a directory.
+        /// </summary>
+        /// <param name="dirPath_passed"></param>
+        /// <returns>true if it is succesful at either finding or creating a directory at the supplied path. False if not succesful at one of these.</returns>
+        private bool TryToFindOrCreateDirectory( string dirPath_passed )
 		{
 			NamruLogManager.Log($"{nameof(TryToFindOrCreateDirectory)}({nameof(dirPath_passed)}: '{dirPath_passed}')", 
 				LogDestination.Hidden);
@@ -346,7 +322,6 @@ namespace NamruUtilitySuite
 				}
 			}
 
-			NamruLogManager.DecrementTabLevel();
 			return true;
 		}
 
@@ -357,107 +332,245 @@ namespace NamruUtilitySuite
 
 			flag_haveSuccesfullyFoundOrCreatedNamruDirectory = TryToFindOrCreateDirectory( dirPath_NamruDirectory );
 
-			NamruLogManager.DecrementTabLevel();
 		}
 
-		public void TryToFindOrCreateTextTrialResultsDirectory()
+		public void TryToFindOrCreateTrialResultsDirectory()
 		{
-			NamruLogManager.Log($"{nameof(TryToFindOrCreateTextTrialResultsDirectory)}({nameof(dirPath_TrialResultsDirectory)}: '{dirPath_TrialResultsDirectory}')",
+			NamruLogManager.Log($"{nameof(TryToFindOrCreateTrialResultsDirectory)}({nameof(dirPath_TrialResultsDirectory)}: '{dirPath_TrialResultsDirectory}')",
 				LogDestination.Hidden );
+            NamruLogManager.IncrementTabLevel();
 
-			flag_haveSuccesfullyFoundOrCreatedTrialResultsDirectory = TryToFindOrCreateDirectory(dirPath_TrialResultsDirectory);
+            flag_haveSuccesfullyFoundOrCreatedTrialResultsDirectory = TryToFindOrCreateDirectory(dirPath_TrialResultsDirectory);
 
-			NamruLogManager.DecrementTabLevel();
-		}
+            NamruLogManager.DecrementTabLevel();
+        }
 
-		public void TryToFindOrCreateCurrentSessionDirectory()
+        public void TryToFindOrCreateCurrentSessionDirectory()
+        {
+            NamruLogManager.Log($"{nameof(TryToFindOrCreateCurrentSessionDirectory)}({nameof(dirPath_CurrentSessionDirectory)}: '{dirPath_CurrentSessionDirectory}')",
+                LogDestination.Hidden);
+            NamruLogManager.IncrementTabLevel();
+
+            flag_haveSuccesfullyFoundOrCreatedCurrentSessionDirectory = TryToFindOrCreateDirectory( dirPath_CurrentSessionDirectory );
+
+            NamruLogManager.DecrementTabLevel();
+        }
+        #endregion
+
+        /// <summary>
+        /// Call this method when the participant ID is set through the host program. Creates the full derived paths of the 
+        /// current session directory and trial results, and creates the current session directory.
+        /// </summary>
+        /// <param name="prtcipntIdString"></param>
+        /// <returns></returns>
+        public bool SetParticipantId_action( string prtcipntIdString )
 		{
-			NamruLogManager.Log(
-				$"{nameof(TryToFindOrCreateCurrentSessionDirectory)}({nameof(dirPath_CurrentSessionDirectory)}: '{dirPath_CurrentSessionDirectory}')",
-				LogDestination.Console );
+			NamruLogManager.Log( $"{nameof(SetParticipantId_action)}({prtcipntIdString})", LogDestination.Hidden );
 
-			flag_haveSuccesfullyFoundOrCreatedCurrentSessionDirectory = TryToFindOrCreateDirectory(dirPath_CurrentSessionDirectory);
-
-			NamruLogManager.DecrementTabLevel();
-		}
-
-		public bool SetParticipantId_action( string s )
-		{
-			NamruLogManager.Log( $"{nameof(SetParticipantId_action)}({s})", LogDestination.Hidden );
-
-			participantID = s;
+			participantID = prtcipntIdString;
 
 			if ( string.IsNullOrEmpty(participantID) )
 			{
 				NamruLogManager.LogError($"supplied participant id was empty. Cannot calculate a session filepath without a valid participant ID. Returning early...");
 				return false;
 			}
-			else
+
+			dirPath_CurrentSessionDirectory = Path.Combine( dirPath_TrialResultsDirectory, participantID );
+
+            sessionString = $"{participantID}_{DateTime.Now.Year}-{DateTime.Now.Month}-{DateTime.Now.Day}_session";
+			int sessionNumb = 1;
+
+			if ( Directory.Exists(dirPath_CurrentSessionDirectory) )
 			{
-				dirPath_CurrentSessionDirectory = Path.Combine(dirPath_TrialResultsDirectory, participantID);
-				bool sessDirAlreadyExisted = File.Exists(dirPath_CurrentSessionDirectory);
-				TryToFindOrCreateCurrentSessionDirectory();
+				NamruLogManager.Log($"Directory '{dirPath_CurrentSessionDirectory}' already existed. Using this directory for trial data. Now attempting to generate a unique session string...");
 
-				sessionString = $"{participantID}_{DateTime.Now.Year}-{DateTime.Now.Month}-{DateTime.Now.Day}_session";
-				int sessionNumb = 1;
+				string tryPath = Path.Combine( dirPath_CurrentSessionDirectory, $"{sessionString}{sessionNumb}.txt" );
 
-				if (sessDirAlreadyExisted)
+                if ( File.Exists(tryPath) )
 				{
-					NamruLogManager.Log($"Directory '{dirPath_CurrentSessionDirectory}' already existed. Using this directory for trial data. Now attempting to generate a unique session string...");
+					NamruLogManager.Log($"file at '{tryPath}' already existed. Trying to find a unique trial number for this session...");
 
-					bool foundUniqueSessionNumber = false;
-					while (!foundUniqueSessionNumber)
+                    for ( int i = 0; i < 100; i++ )
 					{
-						if (File.Exists(Path.Combine(dirPath_CurrentSessionDirectory, $"{sessionString}{sessionNumb}.txt")))
-						{
-							sessionNumb++;
-						}
+                        sessionNumb++;
+
+                        if ( sessionNumb < 100 )
+                        {
+							tryPath = Path.Combine( dirPath_CurrentSessionDirectory, $"{sessionString}{sessionNumb}.txt" );
+
+                            if ( !File.Exists(tryPath) )
+							{
+								NamruLogManager.Log( $"Found unique path at: '{tryPath}'" );
+								break;
+							}
+                        }
 						else
 						{
-							foundUniqueSessionNumber = true;
-							sessionString += sessionNumb;
-							filePath_sessionTrialResults = Path.Combine(dirPath_CurrentSessionDirectory, sessionString);
-							NamruLogManager.Log($"Found unique filepath for session at: '{filePath_sessionTrialResults}'");
+                            NamruLogManager.LogError($"Found too many sessions for user on current day. Assuming infinite loop. Breaking early to prevent crash...");
+                            return false;
 						}
+                    }
+                }
 
-						if (sessionNumb > 100)
-						{
-							NamruLogManager.LogError( $"Found over 100 sessions for this user. Assuming infinite loop. Breaking early..." );
-							NamruLogManager.DecrementTabLevel();
-							return false;
-						}
+				/*
+				bool foundUniqueSessionNumber = false;
+				while ( !foundUniqueSessionNumber )
+				{
+					if ( File.Exists(Path.Combine(dirPath_CurrentSessionDirectory, $"{sessionString}{sessionNumb}.txt")) )
+					{
+						sessionNumb++;
+					}
+					else
+					{
+						foundUniqueSessionNumber = true;
+						sessionString += sessionNumb;
+						filePath_sessionTrialResults = Path.Combine(dirPath_CurrentSessionDirectory, sessionString);
+						NamruLogManager.Log($"Found unique filepath for session at: '{filePath_sessionTrialResults}'");
+					}
+
+					if ( sessionNumb > 100 )
+					{
+						NamruLogManager.LogError( $"Found over 100 sessions for this user. Assuming infinite loop. Breaking early..." );
+						return false;
 					}
 				}
-				else
-				{
-					NamruLogManager.Log($"Directory '{dirPath_CurrentSessionDirectory}' did NOT already exist. Making this directory for trial data...");
-					sessionString += sessionNumb;
-					filePath_sessionTrialResults = Path.Combine(dirPath_CurrentSessionDirectory, sessionString);
-				}
-
-				NamruLogManager.Log($"Succesfully created {nameof(filePath_sessionTrialResults)} of: '{filePath_sessionTrialResults}. Now attempting to create this file...");
-				try
-				{
-					File.Create(filePath_sessionTrialResults + ".txt");
-				}
-				catch ( Exception e )
-				{
-					NamruLogManager.LogException( e );
-					NamruLogManager.DecrementTabLevel();
-					return false;
-				}
-
-				NamruLogManager.Log( "succesfully created session file" );
-				flag_haveSuccesfullyCreatedSessionFile = true;
+				*/
 			}
+			else
+			{
+				NamruLogManager.Log( $"Directory '{dirPath_CurrentSessionDirectory}' did NOT already exist...", LogDestination.Console );
+            }
 
-			NamruLogManager.DecrementTabLevel();
-			return true;
+            sessionString += sessionNumb;
+            filePath_sessionTrialResults = Path.Combine( dirPath_CurrentSessionDirectory, sessionString + ".txt" );
+
+            TryToFindOrCreateCurrentSessionDirectory();
+
+            NamruLogManager.Log($"Succesfully created session filepath string of: '{filePath_sessionTrialResults}.");
+			
+			return flag_haveSuccesfullyFoundOrCreatedCurrentSessionDirectory;
 		}
 
-		public void WriteToLogFile(string msg)
+        public bool TryToStartLogFileWriter()
+        {
+            NamruLogManager.Log( $"{nameof(TryToStartLogFileWriter)}()", LogDestination.Console );
+            NamruLogManager.IncrementTabLevel();
+
+			if ( !flag_haveSuccesfullyFoundOrCreatedNamruDirectory )
+			{
+				NamruLogManager.LogError( $"Never created namru directory for saving log. Returning early...");
+                NamruLogManager.DecrementTabLevel();
+
+                return false;
+			}
+
+            NamruLogManager.Log($"trying to create log at filepath: '{filePath_log}'...");
+            try
+            {
+                streamWriter_log = new StreamWriter(filePath_log);
+                streamWriter_log.WriteLine($"Created log at: '{DateTime.Now}'");
+
+                //File.WriteAllText( FilePath_log, $"Created log at: '{System.DateTime.Now}'" );
+                flag_haveSuccesfullyFoundOrCreatedLogFile = true;
+
+            }
+            catch ( Exception e )
+            {
+                NamruLogManager.LogException( e );
+                NamruLogManager.DecrementTabLevel();
+
+                return false;
+            }
+
+            NamruLogManager.DecrementTabLevel();
+
+			return true;
+        }
+
+        /// <summary>
+        /// Attempts to create the trial results file, then opens a streamwriter for writing to this file.
+		/// You should manually call this in the host program, probably in the start/settings scene before 
+		/// moving on to the task.
+        /// </summary>
+        /// <returns>true if file create and stream create was succesful, false if not.</returns>
+        public bool TryToStartTrialResultsWriting()
+        {
+            NamruLogManager.Log( $"{nameof(TryToStartTrialResultsWriting)}()", LogDestination.Console );
+            NamruLogManager.IncrementTabLevel();
+
+			if ( !flag_haveSuccesfullyFoundOrCreatedTrialResultsDirectory )
+			{
+				dbgReport = $"Cannot write to trial results because trial results directory was never succesfully found or created.";
+				NamruLogManager.LogError( dbgReport );
+                NamruLogManager.DecrementTabLevel();
+                return false;
+			}
+
+            if ( !flag_haveSuccesfullyFoundOrCreatedCurrentSessionDirectory )
+            {
+                dbgReport = $"Cannot write to trial results because current session directory was never succesfully found or created.";
+                NamruLogManager.LogError(dbgReport);
+                NamruLogManager.DecrementTabLevel();
+                return false;
+            }
+
+            NamruLogManager.Log( $"trying to create trial results at filepath: '{filePath_sessionTrialResults}'...", LogDestination.Console );
+            try
+            {
+				if ( !flag_haveSuccesfullyCreatedSessionFile )
+				{
+					NamruLogManager.Log($"trying to create session file at: '{filePath_sessionTrialResults}'...");
+                    //File.Create( filePath_sessionTrialResults );
+					flag_haveSuccesfullyCreatedSessionFile = true;
+                }
+
+				NamruLogManager.Log($"created session file.");
+
+				
+                streamWriter_trialResults = new StreamWriter(filePath_sessionTrialResults);
+
+                if ( DataHeaders.Count > 0 )
+                {
+                    string headerString = "";
+					for( int i = 0; i < DataHeaders.Count; i++ )
+					{
+						headerString += DataHeaders[i];
+						if( i < DataHeaders.Count - 1 )
+						{
+							headerString += ",";
+						}
+					}
+
+					NamruLogManager.Log($"Found there were headers. Writing headers to line...", LogDestination.Console );
+					streamWriter_trialResults.WriteLine( headerString );
+                    NamruLogManager.Log($"Wrote headers to line...", LogDestination.Console);
+
+                }
+                else
+				{
+					NamruLogManager.Log($"{nameof(DataHeaders)} was blank, so not writing initial line of dataheaders...", LogDestination.Console );
+				}
+
+                NamruLogManager.Log($"Created trial results at: '{System.DateTime.Now}'");
+                flag_haveSuccesfullyCreatedTrialResultsFile = true;
+
+            }
+            catch ( Exception e )
+            {
+				dbgReport = e.ToString();
+                NamruLogManager.LogException(e);
+                NamruLogManager.DecrementTabLevel();
+                return false;
+            }
+
+            NamruLogManager.DecrementTabLevel();
+
+			return true;
+        }
+
+        public void WriteToLogFile(string msg)
 		{
-			if (AmDoingLog && flag_haveSuccesfullyFoundOrCreatedLogFile && !flag_writersShouldBeDisposed && streamWriter_log != null)
+			if ( AmDoingLog && flag_haveSuccesfullyFoundOrCreatedLogFile && !flag_writersShouldBeDisposed && streamWriter_log != null )
 			{
 				streamWriter_log.WriteLine(msg);
 			}
@@ -471,27 +584,21 @@ namespace NamruUtilitySuite
 		{
 			NamruLogManager.Log($"{nameof(NamruSessionManager)}.{nameof(WriteToTrialResults)}('{s}')");
 
-			if (AmOutputtingTrialResults && flag_haveSuccesfullyFoundOrCreatedTrialResultsDirectory)
+			if ( AmOutputtingTrialResults && flag_haveSuccesfullyFoundOrCreatedTrialResultsDirectory )
 			{
-				if (trialResultsMode == TrialResultsMode.ToFennec)
+				if( streamWriter_trialResults != null )
 				{
-
+					streamWriter_trialResults.WriteLine( s );
 				}
-				else if( trialResultsMode == TrialResultsMode.ToTextFile )
+				else
 				{
-					if( streamWriter_trialResults != null )
-					{
-						streamWriter_trialResults.WriteLine( s );
-					}
-					else
-					{
-						NamruLogManager.LogError( $"StreamWriter is closed, can't write to file. Attempting to write to error log..." );
-					}
+					NamruLogManager.LogError( $"StreamWriter is closed, can't write to file. Attempting to write to error log..." );
 				}
 			}
 		}
 
-		public bool StartUDPListening()
+        #region SENDING/RECIEVING ------------------------------------------------------------------------
+        public bool StartUDPListening()
 		{
 			NamruLogManager.Log( $"{nameof(StartUDPListening)}()", LogDestination.Hidden );
 			// UDP init stuff-----------------
@@ -568,7 +675,6 @@ namespace NamruUtilitySuite
 				NamruLogManager.LogError( $"Caught exception of type: '{e.GetType()}' trying to initialize a fennec sender. Exception says: " + e.ToString() );
 			}
 
-			NamruLogManager.DecrementTabLevel();
 		}
 
 		public void SendToFennec(string name, double value, bool sendData = false)
@@ -583,17 +689,26 @@ namespace NamruUtilitySuite
 
 			//NAMRU_Debug.Log( $"{nameof(NamruSessionManager)}.{nameof(SendToFennec)}()" );
 		}
+        #endregion
 
-
-		[ContextMenu("z call CloseMe()")]
+        #region CLOSING --------------------------------------------------------------------------
+        [ContextMenu("z call CloseMe()")]
 		public void CloseMe()
 		{
-			NamruLogManager.Log($"{nameof(CloseMe)}()", LogDestination.Hidden);
+			NamruLogManager.Log($"{nameof(CloseMe)}()", LogDestination.Console );
+
+			if( flag_amClosing )
+			{
+				NamruLogManager.Log( $"Decided already closing. Will not proceed with method. Returning early...", LogDestination.Console );
+				return;
+			}
+
 			CloseUDPConnection();
 
 			DisposeAllWriters();
 
-			NamruLogManager.DecrementTabLevel();
+			flag_amClosing = true;
+			
 		}
 
 		[ContextMenu("z call DisposeAllWriters()")]
@@ -637,9 +752,6 @@ namespace NamruUtilitySuite
 				NamruLogManager.LogError($"Got exceptipon attempting to dispose writers after spot: '{spot}'. Exception says:");
 				NamruLogManager.LogError(e.ToString());
 			}
-
-			NamruLogManager.DecrementTabLevel();
-
 		}
 
 		public void CloseUDPConnection()
@@ -667,12 +779,11 @@ namespace NamruUtilitySuite
 			{
 				NamruLogManager.Log($"Was going to close {nameof(udpClient)}, but found it was already null...");
 			}
-
-			NamruLogManager.DecrementTabLevel();
-
 		}
 
-		private void MakeDebugFileString()
+        #endregion
+
+        private void MakeDebugFileString()
 		{
 			DBG_Class = $"{nameof(amPastFirstLoad)}: '{amPastFirstLoad}'\n" +
 				$"{nameof(participantID)}: '{participantID}'\n" +

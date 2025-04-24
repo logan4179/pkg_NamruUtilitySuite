@@ -100,6 +100,11 @@ namespace NamruUtilitySuite
 
         public void Update()
         {
+            if( Stages == null || Stages.Length <= 0 )
+            {
+                return;
+            }
+
             if (index_currentStage < Stages.Length)
             {
                 Stages[index_currentStage].UpdateMe(Time.deltaTime);
