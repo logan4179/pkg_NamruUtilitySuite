@@ -74,7 +74,7 @@ namespace NamruUtilitySuite
 		[Tooltip("Makes the format for the csv file headers for the output for this session")]
 		public List<string> DataHeaders;
 		//[SerializeField] TrialResultsMode trialResultsMode;
-		[SerializeField] TrialResultsFormat trialResultsFormat;
+		[SerializeField] TrialResultsFileFormat trialResultsFormat;
 
 		[Header("[----------- TRUTH ----------]")]
 		[Tooltip("Allows independent control over whether this manager will output trial results for the current session")]
@@ -211,7 +211,7 @@ namespace NamruUtilitySuite
 
 		private void Start()
 		{
-			NamruLogManager.Log( $"Start()", LogDestination.Hidden );
+			NamruLogManager.Log( $"[{nameof(NamruSessionManager)}].Start()", LogDestination.Hidden );
 			NamruLogManager.IncrementTabLevel();
 
 			amPastFirstLoad = true;
@@ -220,8 +220,8 @@ namespace NamruUtilitySuite
 
 			MakeDebugFileString();
 
+			NamruLogManager.Log($"End of [{nameof(NamruSessionManager)}].Start()...");
 			NamruLogManager.DecrementTabLevel();
-
 		}
 
 		/// <summary>
@@ -384,7 +384,7 @@ namespace NamruUtilitySuite
 			{
 				NamruLogManager.Log($"Directory '{dirPath_CurrentSessionDirectory}' already existed. Using this directory for trial data. Now attempting to generate a unique session string...");
 
-				string tryPath = Path.Combine( dirPath_CurrentSessionDirectory, $"{sessionString}{sessionNumb}.txt" );
+				string tryPath = Path.Combine( dirPath_CurrentSessionDirectory, $"{sessionString}{sessionNumb}.{trialResultsFormat}" );
 
                 if ( File.Exists(tryPath) )
 				{
@@ -396,7 +396,7 @@ namespace NamruUtilitySuite
 
                         if ( sessionNumb < 100 )
                         {
-							tryPath = Path.Combine( dirPath_CurrentSessionDirectory, $"{sessionString}{sessionNumb}.txt" );
+							tryPath = Path.Combine( dirPath_CurrentSessionDirectory, $"{sessionString}{sessionNumb}.{trialResultsFormat}" );
 
                             if ( !File.Exists(tryPath) )
 							{
@@ -411,30 +411,6 @@ namespace NamruUtilitySuite
 						}
                     }
                 }
-
-				/*
-				bool foundUniqueSessionNumber = false;
-				while ( !foundUniqueSessionNumber )
-				{
-					if ( File.Exists(Path.Combine(dirPath_CurrentSessionDirectory, $"{sessionString}{sessionNumb}.txt")) )
-					{
-						sessionNumb++;
-					}
-					else
-					{
-						foundUniqueSessionNumber = true;
-						sessionString += sessionNumb;
-						filePath_sessionTrialResults = Path.Combine(dirPath_CurrentSessionDirectory, sessionString);
-						NamruLogManager.Log($"Found unique filepath for session at: '{filePath_sessionTrialResults}'");
-					}
-
-					if ( sessionNumb > 100 )
-					{
-						NamruLogManager.LogError( $"Found over 100 sessions for this user. Assuming infinite loop. Breaking early..." );
-						return false;
-					}
-				}
-				*/
 			}
 			else
 			{
@@ -442,7 +418,7 @@ namespace NamruUtilitySuite
             }
 
             sessionString += sessionNumb;
-            filePath_sessionTrialResults = Path.Combine( dirPath_CurrentSessionDirectory, sessionString + ".txt" );
+            filePath_sessionTrialResults = Path.Combine( dirPath_CurrentSessionDirectory, sessionString + $".{trialResultsFormat}");
 
             TryToFindOrCreateCurrentSessionDirectory();
 

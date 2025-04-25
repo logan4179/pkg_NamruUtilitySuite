@@ -14,10 +14,11 @@ namespace NamruUtilitySuite
         ToFennec,
     }
 
-    public enum TrialResultsFormat
+    public enum TrialResultsFileFormat
     {
         none,
-        continuousCSV,
+        txt,
+        CSV,
 
     }
 }
