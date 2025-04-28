@@ -18,7 +18,7 @@ namespace NamruUtilitySuite
     {
         none,
         txt,
-        CSV,
+        csv,
 
     }
 }
