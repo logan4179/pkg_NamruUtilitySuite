@@ -30,7 +30,7 @@ namespace NamruUtilitySuite
 		public static NamruLogManager Instance;
 
 		[SerializeField] private MomentaryDebugLogger momentaryDebugLogger;
-
+		public MomentaryDebugLogger MomentaryDebugLogger => momentaryDebugLogger;
 
 		private int tabLevel = 0;
 		/// <summary>
