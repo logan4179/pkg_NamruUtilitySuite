@@ -13,7 +13,8 @@ namespace NamruUtilitySuite
 		[SerializeField] private RawImage ri_background;
 
 		[Header("[-----------SETTINGS----------]")]
-		[SerializeField] private float duration_momentaryDebugLoggerMessages = 3.5f;
+        [Tooltip("How long messages stay on screen before being removed")]
+        public float MessageDuration = 3.5f;
 		[SerializeField] private int count_maxDebugLogMessages = 8;
 		[SerializeField, Tooltip("If enabled, causes the logger to turn the background on and off depending on whether there are messages showing.")]
 		private bool swizzleBackground = false;
@@ -105,7 +106,12 @@ namespace NamruUtilitySuite
 			*/
 		}
 
-		public void LogMomentarily(string msg)
+        #region API METHODS--------------------------------------------------------------------------
+        /// <summary>
+        /// Logs a message to the MDL that will stay on the screen for a certain amount of time before disappearing.
+        /// </summary>
+        /// <param name="msg">The text string you want to log to the screen.</param>
+        public void LogMomentarily(string msg)
 		{
 			if (swizzleBackground && tempStrings.Count <= 0)
 			{
@@ -113,7 +119,7 @@ namespace NamruUtilitySuite
 			}
 
 			tempStrings.Insert(0, msg);
-			tempStringCountdowns.Insert(0, duration_momentaryDebugLoggerMessages);
+			tempStringCountdowns.Insert(0, MessageDuration);
 			UpdateTemporaryDebugLoggerText();
 		}
 
@@ -122,7 +128,31 @@ namespace NamruUtilitySuite
 			threadsafeString = msg;
 		}
 
-		private void UpdateTemporaryDebugLoggerText()
+        /// <summary>
+        /// Clears the text and background (if swizzling is enabled). Use this if you don't want to 
+        /// wait for clearing, but want to force it immediately.
+        /// </summary>
+        public void Clear()
+        {
+            Debug.Log("clearing...");
+            Debug.Log($"before. tempStrings count: '{tempStrings.Count}', countdowns count: '{tempStringCountdowns.Count}'");
+
+            tempStrings.Clear();
+            tempStringCountdowns.Clear();
+
+            TMP_MomentaryDebugLogger.text = string.Empty;
+
+            if (ri_background != null)
+            {
+                ri_background.color = Color.clear;
+            }
+
+			Debug.Log($"after. tempStrings count: '{tempStrings.Count}', countdowns count: '{tempStringCountdowns.Count}'");
+        }
+
+        #endregion
+
+        private void UpdateTemporaryDebugLoggerText()
 		{
 			if (tempStrings != null && tempStrings.Count > 0)
 			{
@@ -150,7 +180,7 @@ namespace NamruUtilitySuite
 				Debug.LogError("TMP_MomentaryDebugLogger reference was not set in MomentaryDebugLogger!");
 			}
 
-			if (duration_momentaryDebugLoggerMessages <= 0f)
+			if (MessageDuration <= 0f)
 			{
 				amKosher = false;
 				Debug.LogWarning("<b>'duration_momentaryDebugLoggerMessages'</b> not set inside MomentaryDebugLogger!");
