@@ -167,6 +167,9 @@ namespace NamruUtilitySuite
             LogError($"Caught exception of type: {e.GetType()}. Exceptions says: '{e}'");
             NamruSessionManager.Instance.WriteToLogFile($"----Error Dump String----'n" +
                 $"{errorDumpString}");
+
+			Debug.Log($"----Error Dump String----'n" +
+                $"{errorDumpString}");
         }
 
         public static void LogTrialMessage( string msg )
